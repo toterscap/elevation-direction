@@ -1,0 +1,68 @@
+import clr
+clr.AddReference("RevitNodes")
+import Revit
+clr.ImportExtensions(Revit.Elements)
+
+clr.AddReference("RevitServices")
+import RevitServices
+from RevitServices.Persistence import DocumentManager
+from RevitServices.Transactions import TransactionManager
+
+clr.AddReference("RevitAPI")
+import Autodesk
+from Autodesk.Revit.DB import *
+
+import System
+from System.Collections.Generic import *
+
+doc = DocumentManager.Instance.CurrentDBDocument
+uiapp = DocumentManager.Instance.CurrentUIApplication
+
+roomz = UnwrapElement(IN[0])
+elevz = UnwrapElement(IN[1])
+
+#room numbers
+rmnumb = []
+for i in roomz:
+	rmnumb.append(i.Number.ToString())
+
+#view direction
+elevd = []
+elevX = []
+elevY = []
+for i in elevz:
+	elevd.append(i.ViewDirection)	
+	elevX.append(i.ViewDirection.X)
+	elevY.append(i.ViewDirection.Y)
+
+#turn to integers
+def int_it(list):
+	outlist = []
+	for i in list:
+		outlist.append(int(i*100))
+	return outlist
+	
+Xs = int_it(elevX)
+Ys = int_it(elevY)
+
+
+#get string direction of view
+direct = []
+
+for c,i in enumerate(elevz):
+	if Xs[c] in range(45,101):
+		direct.append("WEST")
+	if Xs[c] in range(-101,-45):
+		direct.append("EAST")	
+	if Ys[c] in range(45,101):
+		direct.append("SOUTH")
+	if Ys[c] in range(-101,-45):
+		direct.append("NORTH")	
+	
+
+newname = []
+
+for c,i in enumerate(rmnumb):
+	newname.append(rmnumb[c] + " " + direct[c])
+
+OUT = newname, Xs, Ys,
